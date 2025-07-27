@@ -6,6 +6,7 @@ require('./utils/validate');
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+const authUser = require('./Middlewares/auth');
 
 
 
@@ -136,13 +137,14 @@ app.post('/login', async (req, res) => {
         if (isPasswordValid) {
 
             // create a jwt Token
-            const token = jwt.sign({_id:user._id},"Smriti@Devships12&23");
+            const token = jwt.sign({_id:user._id},"Smriti@Devships12&23",{expiresIn: "1h",});
+            // const token = getJWT();
 
             console.log(token);
 
             // Add The token to cookie and send the response back to the user
               res.cookie("token", token, {
-                httpOnly: true,
+                // httpOnly: true,
                 secure: false,
                 sameSite: "lax",
             });
@@ -165,23 +167,35 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.get('/profile', async (req, res) => {
-    const cookies = req.cookies;
-    const { token } = cookies;
+app.get('/profile', authUser, async (req, res) => {
+    // const cookies = req.cookies;
+    // const { token } = cookies;
+    
 
-    if (!token) {
-        return res.status(401).json({ error: "Token not found in cookies" });
-    }
+    // if (!token) {
+    //     return res.status(401).json({ error: "Token not found in cookies" });
+    // }
 
     try {
-        const decodedMessage = jwt.verify(token, "Smriti@Devships12&23");
-        console.log(decodedMessage);
-        console.log(cookies);
-        res.send("Reading cookies");
+        const user = req.user;
+        // const decodedMessage = jwt.verify(token, "Smriti@Devships12&23");
+        // console.log(decodedMessage);
+        // console.log(cookies);
+        // res.send("Reading cookies");
+
+        res.send(user);
     } catch (err) {
-        console.error("JWT verification failed:", err.message);
-        res.status(403).json({ error: "Invalid or expired token" });
+        // console.error("JWT verification failed:", err.message);
+        // res.status(403).json({ error: "Invalid or expired token" });
+        res.status(400).send("Error in profile");
+
     }
+});
+
+app.post('/sendConnection', authUser , async(req,res)=>{  //Now the API becomes more secure by using auth middlewarepost==
+    console.log("sending connection request");
+    res.send("Connection request sent"); 
+    //by using auth middleware we can check if the user loggedin then only can access this api hence it becomes safe. 
 });
 
 

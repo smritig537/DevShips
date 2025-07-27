@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { validatorErrorSymbol } = require('mongoose/lib/helpers/symbols');
+const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const UserSchema = new mongoose.Schema({
     id:{
@@ -56,6 +57,12 @@ const UserSchema = new mongoose.Schema({
         },
     }
 });
+
+UserSchema.methods.getJWT = async function(){
+    const user = this;
+    const token = jwt.sign({_id:user._id}, "Smriti@Devships12&23",{expiresIn:"2d"});
+    return token;
+}
 
 
 module.exports = mongoose.model('User', UserSchema);
