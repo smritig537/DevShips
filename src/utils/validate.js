@@ -13,3 +13,21 @@ validateSignupDate = (req) =>{
     console.log(req.body);
 
 }
+const validateProfileEditData = (req) => {
+    const allowedEditFields = ["name", "about", "age", "gender"];
+    const keys = Object.keys(req.body);
+
+    if (keys.length === 0) {
+        throw new Error("No fields provided");
+    }
+
+    const isUpdateAllowed = keys.every((k) => allowedEditFields.includes(k));
+
+    if (!isUpdateAllowed) {
+        throw new Error("Update not allowed");
+    }
+    return true;
+};
+
+
+module.exports = { validateSignupDate,validateProfileEditData};
