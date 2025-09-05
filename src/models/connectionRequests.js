@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
+const { ref } = require('process');
 
 const connectionRequestSchema = new mongoose.Schema({
 
     fromUserId: {
-        type: mongoose.Schema.Types.ObjectId
+        type: mongoose.Schema.Types.ObjectId,
+        ref : "User"  //reference to user Collection
     },
     toUserId: {
-        type: mongoose.Schema.Types.ObjectId
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+       
     },
     status:{
         type: String,

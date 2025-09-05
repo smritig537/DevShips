@@ -55,7 +55,21 @@ const UserSchema = new mongoose.Schema({
                 throw new Error('Invalid Gender') //works with every post request::
             }
         },
-    }
+    },
+    photo_url: {
+        type: String,
+        trim: true,
+        validate(value) {
+            if (value && !validator.isURL(value)) {
+                throw new Error('Invalid Photo URL: ' + value);
+            }
+        },
+        default: null // Optional: set to null or a default placeholder URL
+    },
+    Skills: {
+        type: Array,
+        default: [],
+    },
 });
 
 UserSchema.methods.getJWT = async function(){

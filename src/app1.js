@@ -10,6 +10,7 @@ const authUser = require('./Middlewares/auth');
 const authRouter = require('./routes/auth');
 const profileRouter = require('./routes/profile');
 const requestRouter = require('./routes/requests');
+const userRouter = require('./routes/user');
 
 
 
@@ -20,6 +21,7 @@ app.use(cookieParser()); //for reading cookies tokens
 app.use('/', authRouter);
 app.use('/', profileRouter);
 app.use('/', requestRouter);
+app.use('/', userRouter);
 
 
 

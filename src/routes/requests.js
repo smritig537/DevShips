@@ -92,6 +92,7 @@ requestRouter.patch('/update', async(req , res)=>{
      }
 })
 
+// Accept a connection request
 requestRouter.post('/request/send/interested/:toUserId', authUser, async (req, res) => {
     try {
         const fromUserId = req.user._id;
@@ -135,6 +136,75 @@ requestRouter.post('/request/send/interested/:toUserId', authUser, async (req, r
     } catch (e) {
         console.error("Error sending connection request:", e.message);
         res.status(400).json({ error: "Failed to send connection request" });
+    }
+});
+
+// Add to requestRouter.js
+requestRouter.post('/request/review/accepted/:requestId', authUser, async (req, res) => {
+  try {
+    const requestId = req.params.requestId;
+    const loggedInUserId = req.user._id;
+
+    // Find the request
+    const connectionRequest = await ConnectionRequest.findOne({
+      _id: requestId,
+      toUserId: loggedInUserId,
+      status: 'interested'
+    });
+
+    if (!connectionRequest) {
+      return res.status(404).json({ error: 'Connection request not found or not in interested status' });
+    }
+
+    // Update status to accepted
+    connectionRequest.status = 'accepted';
+    await connectionRequest.save();
+
+    // Populate user details
+    await connectionRequest.populate('fromUserId', 'name email photo_url');
+    await connectionRequest.populate('toUserId', 'name email photo_url');
+
+    res.json({
+      message: 'Connection request accepted successfully',
+      data: connectionRequest
+    });
+  } catch (error) {
+    console.error('Error accepting request:', error.message);
+    res.status(500).json({ error: 'Failed to accept request' });
+  }
+});
+
+
+// Reject a connection request
+requestRouter.post('/request/review/rejected/:requestId', authUser, async (req, res) => {
+    try {
+        const requestId = req.params.requestId;
+        const loggedInUserId = req.user._id;
+
+        // Find the request
+        const connectionRequest = await ConnectionRequest.findById(requestId);
+
+        if (!connectionRequest) {
+            return res.status(404).json({ error: "Connection request not found" });
+        }
+
+        // Only the "toUser" can reject
+        if (connectionRequest.toUserId.toString() !== loggedInUserId.toString()) {
+            return res.status(403).json({ error: "Not authorized to reject this request" });
+        }
+
+        // Update status to rejected
+        connectionRequest.status = "rejected";
+        await connectionRequest.save();
+
+        res.json({
+            message: "Connection request rejected successfully",
+            data: connectionRequest
+        });
+
+    } catch (e) {
+        console.error("Error rejecting request:", e.message);
+        res.status(500).json({ error: "Failed to reject request" });
     }
 });
 
